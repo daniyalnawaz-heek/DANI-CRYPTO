@@ -1,0 +1,86 @@
+const crypto = require("crypto");
+const curr_time = new Date();
+
+
+SHA256 = message => crypto.createHash("sha256").update(message).digest("hex");
+
+//console.log(SHA256("dani"));
+
+class Blockchain {
+    constructor() {
+        // This property will contain all the blocks.
+        this.chain = [new Block("default data")];
+    }
+    getLastBlock() {
+        return this.chain[this.chain.length - 1];
+    }
+    addBlock(block) {
+        // Since we are adding a new block, prevHash will be the hash of the old latest block
+        block.prev_hash = this.getLastBlock().curr_hash;
+        // Since now prevHash has a value, we must reset the block's hash
+        block.curr_hash = block.getHash();
+
+        // Object.freeze ensures immutability in our code
+        this.chain.push(Object.freeze(block));
+    }
+    isValid(blockchain = this) {
+        // Iterate over the chain, we need to set i to 1 because there are nothing before the genesis block, so we start at the second block.
+        for (let i = 1; i < blockchain.chain.length; i++) {
+            const currentBlock = blockchain.chain[i];
+            const prevBlock = blockchain.chain[i-1];
+
+            // Check validation
+            if (currentBlock.hash !== currentBlock.getHash() || prevBlock.curr_hash !== currentBlock.prev_hash) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+    show_blockchain(){
+        for( var i=0;i<this.chain.length;i++){
+            
+            
+            
+           console.log(`Time stamp:    ${this.chain[i].time_stamp}`);
+           console.log(`Data stored:    ${this.chain[i].data}`);
+           console.log(`Current hash:    ${this.chain[i].curr_hash}`);
+           console.log(`Previous hash:  ${this.chain[i].prev_hash}`);
+           console.log(" ");
+        }
+        
+    }
+}
+
+class Block{
+   
+    constructor(data){
+        this.data=data;
+        this.time_stamp=curr_time;
+        this.curr_hash = this.getHash();
+        this.prev_hash = "none"; 
+    }
+    
+    getHash() {
+        return SHA256(this.prev_hash + this.time_stamp + this.data);
+    }
+    
+      
+    
+}
+
+const DANI=new Blockchain();
+DANI.addBlock(new Block("daniyal") );
+DANI.addBlock(new Block("nawaz") );
+
+//console.log(DANI.chain[1].data);
+DANI.show_blockchain();
+
+
+
+
+
+
+
+
+
